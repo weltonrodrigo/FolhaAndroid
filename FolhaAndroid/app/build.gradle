@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '20.0.0'
 
     defaultConfig {
         applicationId "org.familianascimento.rodrigo.folhaandroid"
@@ -21,4 +21,16 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'org.jsoup:jsoup:+'
 }
+
+task buildDb(type: Exec) {
+    def config = "libs/db.json"
+    def definitions = "libs/tables"
+    def out = "build/generated/source/buildConfig/debug/"
+
+    commandLine 'java', '-jar', 'libs/sqlitegenerator.jar', '--in=' + definitions   \
+    , '--config=' + config, '--out=' + out
+}
+
+preBuild.dependsOn buildDb

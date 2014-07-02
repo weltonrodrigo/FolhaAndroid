@@ -1,0 +1,7 @@
+{
+    "package": "org.familianascimento.rodrigo.folhaandroid",
+    "contentproviderName": "NoticiasContentProvider",
+    "authority": "org.familianascimento.rodrigo.folhaandroid.noticias",
+    "databaseName": "noticias",
+    "databaseVersion" : 1
+}

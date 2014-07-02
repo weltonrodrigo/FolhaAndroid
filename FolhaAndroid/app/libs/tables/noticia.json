@@ -1,0 +1,36 @@
+{
+    "fields": [
+    {
+        "name": "idnoticia",
+        "type": "int"
+    },
+    {
+        "name": "url",
+        "type": "string"
+    },
+    {
+            "name": "chamada",
+            "type": "string"
+    },
+    {
+            "name": "data",
+            "type": "string"
+    },
+    {
+                "name": "texto",
+                "type": "string"
+    },
+    {
+                "name": "imagem",
+                "type": "string"
+    },
+    {
+                "name": "imagem_caption",
+                "type": "string"
+    },
+    {
+                "name": "imagem_url",
+                "type": "string"
+    }
+    ]
+}
