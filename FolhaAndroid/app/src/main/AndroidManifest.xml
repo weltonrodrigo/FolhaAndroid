@@ -18,10 +18,10 @@
         </activity>
 
         <provider
-            android:name=".ContentProvider"
-            android:authorities="org.familianascimento.rodrigo.folhaandroid.provider"
+            android:name=".NoticiasContentProvider"
+            android:authorities="org.familianascimento.rodrigo.folhaandroid.noticias"
             android:enabled="true"
-            android:exported="false"></provider>
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -24,7 +24,7 @@ public class ContentPuller extends IntentService {
     // Used to write to the system log from this class.
     public static final String LOG_TAG = "DocumentPullService";
 
-    public DocumentPullService() {
+    public ContentPuller() {
         super("DocumentPullService");
     }
 
@@ -37,7 +37,7 @@ public class ContentPuller extends IntentService {
      * When all requests have been handled, the IntentService stops itself,
      * so you should not call {@link #stopSelf}.
      *
-     * @param intent The value passed to {@link
+     * @param workIntent The value passed to {@link
      *               android.content.Context#startService(android.content.Intent)}.
      */
     @Override
