@@ -1,0 +1,19 @@
+{
+    "fields": [
+    {
+        "name": "idnoticia",
+        "type": "int"
+    },
+    {
+        "name": "url",
+        "type": "string"
+    },
+    {
+            "name": "chamada",
+            "type": "string"
+    },
+    {
+            "name": "data",
+            "type": "string"
+    }]
+}
