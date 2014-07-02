@@ -1,20 +1,64 @@
 package org.familianascimento.rodrigo.folhaandroid;
 
 import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 
-public class UltimasNoticias extends Activity {
+public class UltimasNoticias extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    public static final String LOG_TAG = "UltimasNoticias";
+
+    // This will hold the Adapter we are using to fill Listview
+    private SimpleCursorAdapter mAdapter;
+
+    // URl from ultimas noticias
+    private final String URL_TO_NOTICIAS = "http://www.folhabv.com.br/ultimas.php";
+
+    // Flag to avoid recrawling data from server.
+    private boolean crawled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ultimas_noticias);
 
-    }
+        //Model
+        String[] from = new String[]{
+                noticiasDB.ULTIMAS_CHAMADA_COLUMN,
+                //noticiasDB.ULTIMAS_DATA_COLUMN,
+                noticiasDB.ULTIMAS_SECAO_COLUMN
+        };
 
+        //View
+        int[] to = new int[]{
+                R.id.list_item_title,
+                R.id.list_item_secao
+        };
+
+        SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(
+                getApplicationContext(),
+                R.layout.lista_noticias_item,
+                null, //Null cursor for now, but will be changed when query results arrive.
+                from,
+                to,
+                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
+        );
+
+        ListView listView = (ListView) findViewById(R.id.listUltimasNoticias);
+        listView.setAdapter(mAdapter);
+
+        getLoaderManager().initLoader(0, savedInstanceState, this);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -33,5 +77,44 @@ public class UltimasNoticias extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        //Get data online.
+        if (!crawled) {
+            Parser.parseURL(getApplicationContext(), URL_TO_NOTICIAS);
+            crawled = true;
+        }
+
+        String[] result_columns = new String[]{
+                noticiasDB.ULTIMAS__ID_COLUMN,
+                noticiasDB.ULTIMAS_IDNOTICIA_COLUMN,
+                noticiasDB.ULTIMAS_URL_COLUMN,
+                noticiasDB.ULTIMAS_CHAMADA_COLUMN,
+                noticiasDB.ULTIMAS_SECAO_COLUMN,
+                noticiasDB.ULTIMAS_DATA_COLUMN,
+        };
+        String where = null;
+        String whereArgs[] = null;
+        String order = null;
+
+        return new CursorLoader(getApplicationContext(),
+                NoticiasContentProvider.ULTIMAS_URI, result_columns, where, whereArgs, order);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data != null) {
+            mAdapter.swapCursor(data);
+        } else {
+            Log.d(LOG_TAG, "Cursor vazio??");
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 }

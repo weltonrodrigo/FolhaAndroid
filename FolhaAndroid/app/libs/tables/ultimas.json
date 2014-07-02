@@ -12,6 +12,10 @@
             "name": "chamada",
             "type": "string"
     },
+        {
+                "name": "secao",
+                "type": "string"
+        },
     {
             "name": "data",
             "type": "string"

@@ -1,5 +1,8 @@
 package org.familianascimento.rodrigo.folhaandroid;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentValues;
+import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -25,11 +28,13 @@ public class Parser {
     public static final String DATE_REGEX = "^(\\d\\d/\\d\\d/\\d\\d\\d\\d).*";
 
     // TODO: Maybe use a Dictionary or something like that.
-    public static List<Map<Integer, String>> parseURL(URL url) {
+    public static void parseURL(Context context, String urlString) {
 
-        List<Map<Integer, String>> resultados = new ArrayList<Map<Integer, String>>();
+        List<ContentValues> resultados = new ArrayList<ContentValues>();
 
         try {
+
+            URL url = new URL(urlString);
 
             // TODO: lidar com erros do servidor.
             Document document = Jsoup.parse(url, 60);
@@ -42,33 +47,51 @@ public class Parser {
             Elements row = document.select(".texto_ult2");
 
             for (Element e : row) {
+                // A temporary holder for values.
+                ContentValues entry = new ContentValues();
 
-                //Row
-                Map<Integer, String> entry = new ArrayMap<Integer, String>();
-
-                entry.put(DataContract.SECAO, e.select("strong").text());
+                entry.put(noticiasDB.ULTIMAS_SECAO_COLUMN, e.select("strong").text());
 
                 Element a = e.select("a").first();
 
                 // get the absolute href from a link.
-                entry.put(DataContract.URL_NOTICIA, a.attr("abs:href"));
-                entry.put(DataContract.TITULO, a.text());
+                entry.put(noticiasDB.ULTIMAS_URL_COLUMN, a.attr("abs:href"));
+                entry.put(noticiasDB.ULTIMAS_CHAMADA_COLUMN, a.text());
 
                 // Match the regex agains the text.
                 Matcher m = datePattern.matcher(e.text());
 
                 // go to the first match.
                 if (m.find()) {
-                    entry.put(DataContract.DATA, m.group(1));
+                    entry.put(noticiasDB.ULTIMAS_DATA_COLUMN, m.group(1));
                 }
+                // Put this entry on the list for further insertion on DB.
+                resultados.add(entry);
             }
-
-            return resultados;
-
-            //Log.d(LOG_TAG, document.data());
         } catch (Exception e) {
             Log.d(LOG_TAG, e.toString());
-            return null;
+        }
+
+        // New Batch operation
+        NoticiasContentProviderBatchClient batch = new NoticiasContentProviderBatchClient();
+        batch.start();
+
+        for (ContentValues values : resultados) {
+            //New insert operation
+            ContentProviderOperation.Builder operationBuilder =
+                    ContentProviderOperation.newInsert(NoticiasContentProvider.ULTIMAS_URI);
+
+            // Add to the batch.
+            operationBuilder.withValues(values);
+            batch.add(operationBuilder.build());
+
+        }
+
+        try {
+            // Commit those operations to DB
+            batch.commit(context);
+        } catch (Exception e) {
+            Log.d(LOG_TAG, "Error trying to insert noticias on DB:" + e.toString());
         }
     }
 }

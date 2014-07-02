@@ -17,7 +17,7 @@
         android:text="Polícia realiza busca na Penintenciária agrícola e recolhe de geladeira a microondas" />
 
     <TextView
-        android:id="@+id/list_item_subtitle"
+        android:id="@+id/list_item_secao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/list_item_title"
