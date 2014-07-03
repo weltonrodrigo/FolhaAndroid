@@ -2,10 +2,10 @@ package org.familianascimento.rodrigo.folhaandroid;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -45,7 +45,7 @@ public class UltimasNoticias extends Activity implements LoaderManager.LoaderCal
                 R.id.list_item_secao
         };
 
-        SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(
+        mAdapter = new SimpleCursorAdapter(
                 getApplicationContext(),
                 R.layout.lista_noticias_item,
                 null, //Null cursor for now, but will be changed when query results arrive.
@@ -57,7 +57,30 @@ public class UltimasNoticias extends Activity implements LoaderManager.LoaderCal
         ListView listView = (ListView) findViewById(R.id.listUltimasNoticias);
         listView.setAdapter(mAdapter);
 
-        getLoaderManager().initLoader(0, savedInstanceState, this);
+        // Will populate DB with Data from internet on the first time.
+        // Flag crawled will avoid doubled execution.
+        AsyncTask asyncTask = new AsyncTask<Object, Object, Object[]>() {
+            @Override
+            protected Object[] doInBackground(Object[] params) {
+                //Get data online.
+                if (!crawled) {
+                    Parser.parseURL(getApplicationContext(), URL_TO_NOTICIAS);
+                    crawled = true;
+                }
+                return params;
+            }
+
+            @Override
+            protected void onPostExecute(Object[] params) {
+                super.onPostExecute(params);
+
+                // With data already loaded on DB, start the Loader system.
+                getLoaderManager().initLoader(0, (Bundle) params[0], (LoaderManager.LoaderCallbacks) params[1]);
+            }
+        };
+        //Do the action
+        asyncTask.execute(new Object[]{savedInstanceState, this});
+
     }
 
     @Override
@@ -82,11 +105,6 @@ public class UltimasNoticias extends Activity implements LoaderManager.LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        //Get data online.
-        if (!crawled) {
-            Parser.parseURL(getApplicationContext(), URL_TO_NOTICIAS);
-            crawled = true;
-        }
 
         String[] result_columns = new String[]{
                 noticiasDB.ULTIMAS__ID_COLUMN,
