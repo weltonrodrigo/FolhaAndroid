@@ -37,7 +37,7 @@ public class Parser {
             URL url = new URL(urlString);
 
             // TODO: lidar com erros do servidor.
-            Document document = Jsoup.parse(url, 60);
+            Document document = Jsoup.parse(url, 60000);
 
             // Will use this to get a Date 14\05\2014
             Pattern datePattern = Pattern.compile(DATE_REGEX);

@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dip"
-        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textAppearance="?android:textAppearanceLarge"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:text="Polícia realiza busca na Penintenciária agrícola e recolhe de geladeira a microondas" />

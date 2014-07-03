@@ -57,6 +57,9 @@ public class UltimasNoticias extends Activity implements LoaderManager.LoaderCal
         ListView listView = (ListView) findViewById(R.id.listUltimasNoticias);
         listView.setAdapter(mAdapter);
 
+        // With data already loaded on DB, start the Loader system.
+        getLoaderManager().initLoader(0, savedInstanceState, this);
+
         // Will populate DB with Data from internet on the first time.
         // Flag crawled will avoid doubled execution.
         AsyncTask asyncTask = new AsyncTask<Object, Object, Object[]>() {
@@ -69,17 +72,10 @@ public class UltimasNoticias extends Activity implements LoaderManager.LoaderCal
                 }
                 return params;
             }
-
-            @Override
-            protected void onPostExecute(Object[] params) {
-                super.onPostExecute(params);
-
-                // With data already loaded on DB, start the Loader system.
-                getLoaderManager().initLoader(0, (Bundle) params[0], (LoaderManager.LoaderCallbacks) params[1]);
-            }
         };
         //Do the action
-        asyncTask.execute(new Object[]{savedInstanceState, this});
+        //asyncTask.execute(new Object[]{savedInstanceState, this});
+        //asyncTask.execute(new Object[]{savedInstanceState, this});
 
     }
 
