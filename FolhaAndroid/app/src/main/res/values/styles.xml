@@ -1,8 +1,25 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
+        <!--<item name="android:actionBarStyle">@style/mActionBarStyle</item>-->
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="RobotoTextViewStyle" parent="AppTheme">
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="mActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:fontFamily">sans-serif-bold</item>
+    </style>
+
+    <style name="AppTheme.Chamada" parent="AppTheme">
+        <item name="android:textAppearance">?android:textAppearanceLarge</item>
+        <!--<item name="android:textColor">#09c</item>-->
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">24sp</item>
     </style>
 
 </resources>

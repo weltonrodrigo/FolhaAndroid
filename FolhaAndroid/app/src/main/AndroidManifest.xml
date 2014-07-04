@@ -7,21 +7,39 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".UltimasNoticias"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <!--<activity-->
+        <!--android:name=".UltimasNoticias"-->
+        <!--android:label="@string/app_name" >-->
+        <!--<intent-filter>-->
+        <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <!--</intent-filter>-->
+        <!--</activity>-->
 
         <provider
             android:name=".NoticiasContentProvider"
             android:authorities="org.familianascimento.rodrigo.folhaandroid.noticias"
             android:enabled="true"
             android:exported="false" />
+
+        <activity
+            android:name=".NoticiaListActivity"
+            android:label="@string/title_noticia_list">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".NoticiaDetailActivity"
+            android:label="@string/title_noticia_detail"
+            android:parentActivityName=".NoticiaListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.familianascimento.rodrigo.folhaandroid.NoticiaListActivity" />
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
