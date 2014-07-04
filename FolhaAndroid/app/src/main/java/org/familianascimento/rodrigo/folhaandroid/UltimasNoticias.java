@@ -35,14 +35,15 @@ public class UltimasNoticias extends Activity implements LoaderManager.LoaderCal
         //Model
         String[] from = new String[]{
                 noticiasDB.ULTIMAS_CHAMADA_COLUMN,
-                //noticiasDB.ULTIMAS_DATA_COLUMN,
+                noticiasDB.ULTIMAS_DATA_COLUMN,
                 noticiasDB.ULTIMAS_SECAO_COLUMN
         };
 
         //View
         int[] to = new int[]{
                 R.id.list_item_title,
-                R.id.list_item_secao
+                R.id.list_item_data,
+                R.id.list_item_secao,
         };
 
         mAdapter = new SimpleCursorAdapter(

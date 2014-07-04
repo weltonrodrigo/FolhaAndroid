@@ -16,10 +16,20 @@
 
     <TextView
         android:id="@+id/list_item_secao"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/list_item_title"
         android:textAppearance="?android:textAppearanceSmall"
         android:text="Polícia" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:textAppearanceSmall"
+        android:text="21/06/2014"
+        android:id="@+id/list_item_data"
+        android:layout_alignBottom="@+id/list_item_secao"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
