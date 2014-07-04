@@ -17,6 +17,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            java.srcDir("src-gen/main/java/db")
+        }
+    }
 }
 
 dependencies {
@@ -25,12 +31,17 @@ dependencies {
 }
 
 task buildDb(type: Exec) {
-    def config = "libs/db.json"
-    def definitions = "libs/tables"
-    def out = "build/generated/source/buildConfig/debug/"
+    def config = "src/main/db-gen/db.json"
+    def definitions = "src/main/db-gen/tables"
+    def out = "src-gen/main/java/db"
 
     commandLine 'java', '-jar', 'libs/sqlitegenerator.jar', '--in=' + definitions   \
     , '--config=' + config, '--out=' + out
 }
 
+task cleanDb() {
+    delete "src-gen/main/java/db/"
+}
+
+clean.dependsOn cleanDb
 preBuild.dependsOn buildDb
