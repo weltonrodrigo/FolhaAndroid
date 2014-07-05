@@ -97,4 +97,9 @@ public class NoticiaListActivity extends Activity
         return swipeLayout;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+    }
 }
