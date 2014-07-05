@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
@@ -212,6 +213,26 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
         swipeLayout = ((NoticiaListActivity) mActivity).getSwipeLayout();
         swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setEnabled(false);
+
+        final ListView listView = getListView();
+
+        // Avoid firing onRefresh when scrolling the list
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            // Enables SwipeRefreshLayout only when on top of the list.
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                int topRowVerticalPosition =
+                        (listView == null || listView.getChildCount() == 0) ?
+                                0 : listView.getChildAt(0).getTop();
+                swipeLayout.setEnabled(topRowVerticalPosition >= 0);
+            }
+        });
 
     }
 

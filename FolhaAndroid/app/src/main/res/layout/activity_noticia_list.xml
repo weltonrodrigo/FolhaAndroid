@@ -12,8 +12,8 @@
         <fragment
             android:id="@+id/noticia_list"
             android:name="org.familianascimento.rodrigo.folhaandroid.NoticiaListFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             tools:context="org.familianascimento.rodrigo.folhaandroid.NoticiaListActivity"
             tools:layout="@android:layout/list_content" />
         <!--android:layout_marginLeft="16dp"--><!--android:layout_marginRight="16dp"-->
