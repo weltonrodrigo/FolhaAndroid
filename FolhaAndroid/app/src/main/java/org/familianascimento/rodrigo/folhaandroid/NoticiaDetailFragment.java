@@ -7,12 +7,12 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
@@ -21,7 +21,8 @@ import android.widget.TextView;
  * in two-pane mode (on tablets) or a {@link NoticiaDetailActivity}
  * on handsets.
  */
-public class NoticiaDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class NoticiaDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>
+        , SwipeRefreshLayout.OnRefreshListener {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -33,7 +34,15 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
     private String mURL;
 
     private View rootView;
-    private ProgressBar progressBar;
+
+    // Field to hold this fragment's swipe with progressbar.
+    private SwipeRefreshLayout swipeLayout;
+
+    // This fragment's pullContent task
+    private PullContent pullTask;
+
+    // A flag to to avoid requesting a refresh when already doing.
+    private boolean refreshing = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -51,32 +60,6 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
             mURL = getArguments().getString(ARG_ITEM_ID);
-
-
-            // Will populate DB with Data from internet on the first time.
-            // Flag crawled will avoid doubled execution.
-            AsyncTask asyncTask = new AsyncTask<Object, Object, Object[]>() {
-                @Override
-                protected Object[] doInBackground(Object[] params) {
-                    Log.d(LOG_TAG, "Will get and parse data.");
-                    //Get data online.
-                    ParserNoticia.parseURL(getActivity(), mURL);
-                    return params;
-                }
-
-                @Override
-                protected void onPostExecute(Object[] params) {
-                    super.onPostExecute(params);
-
-                    Log.d(LOG_TAG, "Will Start Loader.");
-                    // With data already loaded on DB, start the Loader system.
-                    //getLoaderManager().initLoader(0, (Bundle) params[0], (LoaderManager.LoaderCallbacks) params[1]);
-                }
-            };
-            //Do the action
-            asyncTask.execute(new Object[]{savedInstanceState, this});
-
-
         }
     }
 
@@ -87,12 +70,16 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
         View rootView = inflater.inflate(R.layout.fragment_noticia_detail, container, false);
         this.rootView = rootView;
 
-        ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        progressBar.setIndeterminate(true);
+        swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.detail_swipe_view);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
-        this.progressBar = progressBar;
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setEnabled(true);
 
-        getLoaderManager().initLoader(0, savedInstanceState, this);
+        getLoaderManager().initLoader(Constants.PULL_TASK_NOTICIA, savedInstanceState, this);
 
         return rootView;
     }
@@ -112,28 +99,67 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        TextView noticia_chamada = (TextView) rootView.findViewById(R.id.noticia_chamada);
-        TextView noticia_data = (TextView) rootView.findViewById(R.id.noticia_data);
-        TextView noticia_corpo = (TextView) rootView.findViewById(R.id.noticia_corpo);
+        // Check if cursor has data
+        if (data.moveToFirst() && data.getCount() != 0) {
+            TextView noticiaChamada = (TextView) rootView.findViewById(R.id.noticia_chamada);
+            TextView noticiaData = (TextView) rootView.findViewById(R.id.noticia_data);
+            TextView noticiaCorpo = (TextView) rootView.findViewById(R.id.noticia_corpo);
 
-        try {
-            data.moveToPosition(0);
-        } catch (Exception e) {
-            Log.d(LOG_TAG, e.toString());
-            return;
-        }
+            noticiaChamada.setText(data.getString(noticiasDB.NOTICIA_CHAMADA_COLUMN_POSITION));
+            noticiaData.setText(data.getString(noticiasDB.NOTICIA_DATA_COLUMN_POSITION));
+            noticiaCorpo.setText(Html.fromHtml(data.getString(noticiasDB.NOTICIA_TEXTO_COLUMN_POSITION)));
+        } else {
 
-        try {
-            noticia_chamada.setText(data.getString(noticiasDB.NOTICIA_CHAMADA_COLUMN_POSITION));
-            noticia_data.setText(data.getString(noticiasDB.NOTICIA_DATA_COLUMN_POSITION));
-            noticia_corpo.setText(Html.fromHtml(data.getString(noticiasDB.NOTICIA_TEXTO_COLUMN_POSITION)));
-            progressBar.setVisibility(View.INVISIBLE);
-        } catch (Exception e) {
-            Log.d(LOG_TAG, "Erro tentando pegar o texto do DB");
+            // Start a refresh of this view.
+            onRefresh();
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+    }
+
+    @Override
+    public void onRefresh() {
+        if (pullTask == null) {
+            // Create the pull content task. We'll recycle it.
+            pullTask = new PullContent();
+        }
+
+        // If we are in the middle of a refreshing, ignore swipe.
+        if (swipeLayout.isRefreshing()) {
+            return;
+        }
+
+        // Start animating
+        swipeLayout.setRefreshing(true);
+
+        // Start the pulling task.
+        // When it ends, it'll end the refresh animation.
+        try {
+            pullTask.execute();
+        } catch (Exception e) {
+
+        }
+    }
+
+    private class PullContent extends AsyncTask {
+        @Override
+        protected Object[] doInBackground(Object[] params) {
+            Log.d(LOG_TAG, "doInBackground of AsyncTask:" + this.toString());
+            //Get data online.
+            ParserNoticia.parseURL(getActivity(), mURL);
+            return params;
+        }
+
+        @Override
+        protected void onPostExecute(Object params) {
+            super.onPostExecute(params);
+
+            Log.d(LOG_TAG, "onPostExecute of AsyncTask:" + this.toString());
+
+            // Stop refreshing animation
+            swipeLayout.setRefreshing(false);
+        }
     }
 }

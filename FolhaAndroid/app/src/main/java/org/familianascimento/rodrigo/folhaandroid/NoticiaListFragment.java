@@ -53,9 +53,6 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
     // The SwipeRefreshLayout of this fragment' parent Activity.
     private SwipeRefreshLayout swipeLayout;
 
-    // Flag to mark if we are in the middle of a refresh.
-    private boolean refreshing = false;
-
     // The asyncTask that pulls content from web
     private PullContent pullTask;
 
@@ -84,7 +81,14 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
+
+        // Check if cursor has data
+        if (data.moveToFirst() && data.getCount() != 0) {
+            mAdapter.swapCursor(data);
+        } else {
+            // Start a refresh of this view when where is no data on DB.
+            onRefresh();
+        }
     }
 
     @Override
@@ -100,7 +104,7 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
         }
 
         // If we are in the middle of a refreshing, ignore swipe.
-        if (refreshing) {
+        if (swipeLayout.isRefreshing()) {
             return;
         }
 
@@ -109,11 +113,7 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
         // Start the pulling task.
         // When it ends, it'll end the refresh animation.
-        try {
-            pullTask.execute();
-        } catch (Exception e) {
-
-        }
+        pullTask.execute();
     }
 
     /**
@@ -177,7 +177,7 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
         setListAdapter(mAdapter);
 
         // Start the load, which will query the DB.
-        getLoaderManager().initLoader(0, savedInstanceState, this);
+        getLoaderManager().initLoader(Constants.PULL_TASK_ULTIMAS, savedInstanceState, this);
 
     }
 
