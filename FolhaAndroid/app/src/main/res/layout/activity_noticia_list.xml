@@ -1,8 +1,23 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/noticia_list"
-    android:name="org.familianascimento.rodrigo.folhaandroid.NoticiaListFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.familianascimento.rodrigo.folhaandroid.NoticiaListActivity"
-    tools:layout="@android:layout/list_content" /><!--android:layout_marginLeft="16dp"--><!--android:layout_marginRight="16dp"-->
+    android:layout_height="match_parent">
+
+    <view
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="android.support.v4.widget.SwipeRefreshLayout"
+        android:id="@+id/swipe_view">
+
+        <fragment
+            android:id="@+id/noticia_list"
+            android:name="org.familianascimento.rodrigo.folhaandroid.NoticiaListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="org.familianascimento.rodrigo.folhaandroid.NoticiaListActivity"
+            tools:layout="@android:layout/list_content" />
+        <!--android:layout_marginLeft="16dp"--><!--android:layout_marginRight="16dp"-->
+    </view>
+
+</RelativeLayout>
+

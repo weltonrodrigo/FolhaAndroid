@@ -20,14 +20,20 @@
     For more on layout aliases, see:
     http://developer.android.com/training/multiscreen/screensizes.html#TaskUseAliasFilters
     -->
-
-    <fragment
-        android:id="@+id/noticia_list"
-        android:name="org.familianascimento.rodrigo.folhaandroid.NoticiaListFragment"
+    <view
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        class="android.support.v4.widget.SwipeRefreshLayout"
+        android:id="@+id/swipe_view"
+        android:layout_weight="1">
+
+        <fragment
+        android:id="@+id/noticia_list"
+        android:name="org.familianascimento.rodrigo.folhaandroid.NoticiaListFragment"
+        android:layout_height="match_parent"
+            android:layout_width="match_parent"
         tools:layout="@android:layout/list_content" />
+    </view>
 
     <FrameLayout
         android:id="@+id/noticia_detail_container"

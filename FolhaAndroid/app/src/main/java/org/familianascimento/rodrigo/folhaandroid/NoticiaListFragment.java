@@ -8,6 +8,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -22,7 +23,8 @@ import android.widget.SimpleCursorAdapter;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class NoticiaListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class NoticiaListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>
+        , SwipeRefreshLayout.OnRefreshListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -46,6 +48,18 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
     // URl from ultimas noticias
     private final String URL_TO_NOTICIAS = "http://www.folhabv.com.br/ultimas.php";
+
+    // The SwipeRefreshLayout of this fragment' parent Activity.
+    private SwipeRefreshLayout swipeLayout;
+
+    // Flag to mark if we are in the middle of a refresh.
+    private boolean refreshing = false;
+
+    // The asyncTask that pulls content from web
+    private PullContent pullTask;
+
+    // The activity holding this fragment.
+    private Activity mActivity;
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -75,6 +89,30 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onRefresh() {
+        if (pullTask == null) {
+            // Create the pull content task. We'll recycle it.
+            pullTask = new PullContent();
+        }
+
+        // If we are in the middle of a refreshing, ignore swipe.
+        if (refreshing) {
+            return;
+        }
+
+        // Start animating
+        swipeLayout.setRefreshing(true);
+
+        // Start the pulling task.
+        // When it ends, it'll end the refresh animation.
+        try {
+            pullTask.execute();
+        } catch (Exception e) {
+
+        }
     }
 
     /**
@@ -110,8 +148,6 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //getActivity().setProgressBarIndeterminateVisibility(true);
-
         //Model
         String[] from = new String[]{
                 noticiasDB.ULTIMAS_CHAMADA_COLUMN,
@@ -135,31 +171,12 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
                 SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
         );
 
+        // Give this list an Cursor adapter with no Cursor, because we'll give it one when
+        // data arrives from DB. see @link<onLoadFinished>
         setListAdapter(mAdapter);
 
-        getActivity().setProgressBarIndeterminate(true);
+        // Start the load, which will query the DB.
         getLoaderManager().initLoader(0, savedInstanceState, this);
-
-        // Will populate DB with Data from internet on the first time.
-        // Flag crawled will avoid doubled execution.
-        AsyncTask asyncTask = new AsyncTask<Object, Object, Object[]>() {
-            @Override
-            protected Object[] doInBackground(Object[] params) {
-                //Get data online.
-                Parser.parseURL(getActivity(), URL_TO_NOTICIAS);
-                return params;
-            }
-
-            @Override
-            protected void onPostExecute(Object[] params) {
-                super.onPostExecute(params);
-
-                // With data already loaded on DB, start the Loader system.
-                getLoaderManager().initLoader(0, (Bundle) params[0], (LoaderManager.LoaderCallbacks) params[1]);
-            }
-        };
-        //Do the action
-        asyncTask.execute(new Object[]{savedInstanceState, this});
 
     }
 
@@ -184,6 +201,18 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
         }
 
         mCallbacks = (Callbacks) activity;
+
+        // Save a reference to this fragment activity for further usage.
+        mActivity = activity;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        swipeLayout = ((NoticiaListActivity) mActivity).getSwipeLayout();
+        swipeLayout.setOnRefreshListener(this);
+
     }
 
     @Override
@@ -238,5 +267,27 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
         }
 
         mActivatedPosition = position;
+    }
+
+
+    /**
+     * This Class is just a wrapper aroung an AsyncTask.
+     */
+    private class PullContent extends AsyncTask {
+
+        @Override
+        protected Object[] doInBackground(Object[] params) {
+            //Get data online.
+            Parser.parseURL(getActivity(), URL_TO_NOTICIAS);
+            return params;
+        }
+
+        @Override
+        protected void onPostExecute(Object params) {
+            super.onPostExecute(params);
+
+            // Notify SwipeLayout that refresh ended.
+            swipeLayout.setRefreshing(false);
+        }
     }
 }

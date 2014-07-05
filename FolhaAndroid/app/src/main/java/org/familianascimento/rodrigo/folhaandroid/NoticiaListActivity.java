@@ -4,6 +4,7 @@ package org.familianascimento.rodrigo.folhaandroid;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 
 
 /**
@@ -31,6 +32,12 @@ public class NoticiaListActivity extends Activity
      */
     private boolean mTwoPane;
 
+    /**
+     * This field keeps a reference to SwipeRefreshLayout of this activity for the fragments
+     * must deal with this.
+     */
+    private SwipeRefreshLayout swipeLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +58,11 @@ public class NoticiaListActivity extends Activity
 
         }
 
-        // TODO: If exposing deep links into your app, handle intents here.
+        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_view);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
     }
 
     /**
@@ -79,5 +90,11 @@ public class NoticiaListActivity extends Activity
             detailIntent.putExtra(NoticiaDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
+
     }
+
+    public SwipeRefreshLayout getSwipeLayout() {
+        return swipeLayout;
+    }
+
 }
