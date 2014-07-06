@@ -8,8 +8,8 @@ android {
         applicationId "org.familianascimento.rodrigo.folhaandroid"
         minSdkVersion 17
         targetSdkVersion 19
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.3"
     }
     buildTypes {
         release {
@@ -29,6 +29,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'org.jsoup:jsoup:+'
     compile 'com.android.support:support-v4:19.+'
+    compile 'net.hockeyapp.android:HockeySDK:+'
 }
 
 task buildDb(type: Exec) {
@@ -36,7 +37,7 @@ task buildDb(type: Exec) {
     def definitions = "src/main/db-gen/tables"
     def out = "src-gen/main/java/db"
 
-    commandLine 'java', '-jar', 'libs/sqlitegenerator.jar', '--in=' + definitions   \
+    commandLine 'java', '-jar', 'libs/sqlitegenerator.jar', '--in=' + definitions     \
     , '--config=' + config, '--out=' + out
 }
 
