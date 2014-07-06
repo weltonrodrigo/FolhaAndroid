@@ -15,7 +15,7 @@
             android:padding="16dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:id="@+id/noticia_chamada"
@@ -32,20 +32,23 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
 
-            <Space
+            <ImageView
                 android:layout_width="fill_parent"
-                android:layout_height="100px"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/noticia_data"
+                android:id="@+id/image_view"
+                android:layout_alignParentLeft="false"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:layout_centerHorizontal="true"
-                android:background="#ffdddddd"
-                android:id="@+id/space" />
+                android:layout_alignWithParentIfMissing="false" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/noticia_corpo"
-                android:layout_below="@+id/space"
+                android:layout_below="@+id/image_view"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
 

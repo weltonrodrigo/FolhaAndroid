@@ -5,6 +5,7 @@ import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,7 +14,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.Volley;
 
 /**
  * A fragment representing a single Noticia detail screen.
@@ -43,6 +53,8 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
 
     // A flag to to avoid requesting a refresh when already doing.
     private boolean refreshing = false;
+
+    private ImageView imageView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -104,10 +116,36 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
             TextView noticiaChamada = (TextView) rootView.findViewById(R.id.noticia_chamada);
             TextView noticiaData = (TextView) rootView.findViewById(R.id.noticia_data);
             TextView noticiaCorpo = (TextView) rootView.findViewById(R.id.noticia_corpo);
+            imageView = (ImageView) rootView.findViewById(R.id.image_view);
 
             noticiaChamada.setText(data.getString(noticiasDB.NOTICIA_CHAMADA_COLUMN_POSITION));
             noticiaData.setText(data.getString(noticiasDB.NOTICIA_DATA_COLUMN_POSITION));
             noticiaCorpo.setText(Html.fromHtml(data.getString(noticiasDB.NOTICIA_TEXTO_COLUMN_POSITION)));
+
+            // TODO: set correct width and height for timthumb.
+            String imageURL = data.getString(noticiasDB.NOTICIA_IMAGEM_URL_COLUMN_POSITION);
+
+            if (imageURL.equals("")) {
+
+                // No image URL: take imageview out of layout.
+                imageView.setVisibility(View.GONE);
+
+            } else {
+
+                ImageRequest imageRequest = new ImageRequest(getImageURL(imageURL),
+                        new Response.Listener<Bitmap>() {
+                            @Override
+                            public void onResponse(Bitmap response) {
+                                imageView.setImageBitmap(response);
+                            }
+                        }
+                        , 0, 0, Bitmap.Config.ARGB_8888, null
+                );
+
+                RequestQueue queue = Volley.newRequestQueue(getActivity().getApplicationContext());
+                queue.add(imageRequest);
+            }
+
         } else {
 
             // Start a refresh of this view.
@@ -139,6 +177,24 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
         } catch (Exception e) {
             Log.d(LOG_TAG, e.toString());
         }
+    }
+
+    public String getImageURL(String originalURL) {
+
+        String finalUrl = null;
+
+        //TODO: Best management of this timthumb madness. Maybe use URL utilites.
+        try {
+            finalUrl = originalURL.replace("/timthumb.php?src=", "");
+            int sub = finalUrl.lastIndexOf("&h=");
+
+            finalUrl = finalUrl.substring(0, sub);
+        } catch (Exception e) {
+            Log.d(LOG_TAG, e.toString());
+        }
+
+        // If we couldn' fiddle with url.
+        return finalUrl != null ? finalUrl : originalURL;
     }
 
     private class PullContent extends AsyncTask {
