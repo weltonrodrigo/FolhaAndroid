@@ -8,8 +8,8 @@ android {
         applicationId "org.familianascimento.rodrigo.folhaandroid"
         minSdkVersion 17
         targetSdkVersion 19
-        versionCode 3
-        versionName "1.3"
+        versionCode 4
+        versionName "1.4"
     }
     buildTypes {
         release {
