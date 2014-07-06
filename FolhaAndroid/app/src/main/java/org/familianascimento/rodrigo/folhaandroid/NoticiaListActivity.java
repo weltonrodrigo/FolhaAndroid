@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
+
 
 /**
  * An activity representing a list of Noticias. This activity
@@ -101,5 +104,19 @@ public class NoticiaListActivity extends Activity
     protected void onResume() {
         super.onResume();
         overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+
+        // HockeyApp Support.
+        checkForCrashes();
+        checkForUpdates();
+    }
+
+    // HockeyApp support.
+    private void checkForCrashes() {
+        CrashManager.register(this, "83f0c9f8ac7fa6d5551836888c656643");
+    }
+
+    private void checkForUpdates() {
+        // Remove this for store builds!
+        UpdateManager.register(this, "83f0c9f8ac7fa6d5551836888c656643");
     }
 }

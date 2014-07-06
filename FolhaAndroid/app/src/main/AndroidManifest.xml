@@ -40,8 +40,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.familianascimento.rodrigo.folhaandroid.NoticiaListActivity" />
         </activity>
+
+        <!-- Hockeyapp integration -->
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- HockeyApp integration-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>
