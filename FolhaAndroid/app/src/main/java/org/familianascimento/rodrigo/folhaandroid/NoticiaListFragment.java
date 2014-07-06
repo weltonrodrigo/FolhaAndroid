@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
@@ -53,11 +54,14 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
     // The SwipeRefreshLayout of this fragment' parent Activity.
     private SwipeRefreshLayout swipeLayout;
 
-    // The asyncTask that pulls content from web
-    private PullContent pullTask;
+    // A flag to to avoid requesting a refresh when already doing.
+    private boolean refreshing = false;
 
     // The activity holding this fragment.
     private Activity mActivity;
+
+    // This class LOG_TAG
+    private static final String LOG_TAG = "NoticiasListFragment";
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -98,14 +102,12 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
     @Override
     public void onRefresh() {
-        if (pullTask == null) {
-            // Create the pull content task. We'll recycle it.
-            pullTask = new PullContent();
-        }
 
         // If we are in the middle of a refreshing, ignore swipe.
-        if (swipeLayout.isRefreshing()) {
+        if (refreshing) {
             return;
+        } else {
+            refreshing = true;
         }
 
         // Start animating
@@ -113,7 +115,12 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
         // Start the pulling task.
         // When it ends, it'll end the refresh animation.
-        pullTask.execute();
+        // Async tasks cannot be recycled.
+        try {
+            new PullContent().execute();
+        } catch (Exception e) {
+            Log.d(LOG_TAG, e.toString());
+        }
     }
 
     /**
@@ -309,6 +316,9 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
 
             // Notify SwipeLayout that refresh ended.
             swipeLayout.setRefreshing(false);
+
+            // Unset flag so we can allow new refreshes.
+            refreshing = false;
         }
     }
 }

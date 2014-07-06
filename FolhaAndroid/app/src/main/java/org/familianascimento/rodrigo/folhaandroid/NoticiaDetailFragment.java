@@ -121,14 +121,12 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
 
     @Override
     public void onRefresh() {
-        if (pullTask == null) {
-            // Create the pull content task. We'll recycle it.
-            pullTask = new PullContent();
-        }
 
         // If we are in the middle of a refreshing, ignore swipe.
-        if (swipeLayout.isRefreshing()) {
+        if (refreshing) {
             return;
+        } else {
+            refreshing = true;
         }
 
         // Start animating
@@ -137,9 +135,9 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
         // Start the pulling task.
         // When it ends, it'll end the refresh animation.
         try {
-            pullTask.execute();
+            new PullContent().execute();
         } catch (Exception e) {
-
+            Log.d(LOG_TAG, e.toString());
         }
     }
 
@@ -160,6 +158,9 @@ public class NoticiaDetailFragment extends Fragment implements LoaderManager.Loa
 
             // Stop refreshing animation
             swipeLayout.setRefreshing(false);
+
+            // Unset flag so we can allow new refreshes.
+            refreshing = false;
         }
     }
 }
