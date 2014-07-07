@@ -29,6 +29,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'org.jsoup:jsoup:+'
     compile 'com.android.support:support-v4:19.+'
+    compile 'com.mcxiaoke.volley:library:+'
 }
 
 task buildDb(type: Exec) {
