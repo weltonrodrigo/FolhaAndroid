@@ -9,10 +9,15 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.CursorAdapter;
+import android.widget.FilterQueryProvider;
+import android.widget.Filterable;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
 
 
@@ -63,6 +68,12 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
     // This class LOG_TAG
     private static final String LOG_TAG = "NoticiasListFragment";
 
+    // The query user is entering now.
+    private String mQuery;
+
+    // The SearchView of ActionBar
+    private SearchView mSearchView;
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -79,8 +90,21 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
         String whereArgs[] = null;
         String order = null;
 
+        // If we are on the search state, mQuery will hold the text user is looking for
+        if (!TextUtils.isEmpty(mQuery)) {
+
+            //TODO: Use FullTextSearch3 (FTS3) to increase performance.
+            where = noticiasDB.NOTICIA_CHAMADA_COLUMN + " like ?";
+            whereArgs = new String[]{"%" + mQuery + "%"};
+        }
+
         return new CursorLoader(getActivity(),
                 NoticiasContentProvider.ULTIMAS_URI, result_columns, where, whereArgs, order);
+    }
+
+    public void onQueryChanged(String query) {
+        mQuery = query;
+        getLoaderManager().restartLoader(Constants.PULL_TASK_ULTIMAS, null, this);
     }
 
     @Override
@@ -90,8 +114,12 @@ public class NoticiaListFragment extends ListFragment implements LoaderManager.L
         if (data.moveToFirst() && data.getCount() != 0) {
             mAdapter.swapCursor(data);
         } else {
-            // Start a refresh of this view when where is no data on DB.
-            onRefresh();
+
+            // Unless we are on a query which returned no results, we must populate the DB when
+            // there are no results stored there.
+            if (TextUtils.isEmpty(mQuery)) {
+                onRefresh();
+            }
         }
     }
 

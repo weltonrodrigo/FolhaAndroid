@@ -2,9 +2,18 @@ package org.familianascimento.rodrigo.folhaandroid;
 
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.ListFragment;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.Menu;
+import android.widget.FrameLayout;
+import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 
 
 /**
@@ -24,7 +33,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
  * to listen for item selections.
  */
 public class NoticiaListActivity extends Activity
-        implements NoticiaListFragment.Callbacks {
+        implements NoticiaListFragment.Callbacks, SearchView.OnQueryTextListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -37,6 +46,12 @@ public class NoticiaListActivity extends Activity
      * must deal with this.
      */
     private SwipeRefreshLayout swipeLayout;
+
+    // Hold a reference to this action SearchView
+    private SearchView mSearchView;
+
+    // Keep a handy reference to the ListFragment
+    private NoticiaListFragment mListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +106,42 @@ public class NoticiaListActivity extends Activity
             startActivity(detailIntent);
         }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.ultimas_noticias, menu);
+
+        // Setup search.
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setOnQueryTextListener(this);
+
+        // Setup the reference to ListFragment
+        mListFragment = (NoticiaListFragment) getFragmentManager().findFragmentById(R.id.noticia_list);
+
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+
+        // Hides the keyboard when user hits "ENTER", which will take the form of a search button
+        // on keyboard.
+        mSearchView.clearFocus();
+
+        // Inform searchview this event have been handled.
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        // Send this query to the list fragment.
+        mListFragment.onQueryChanged(newText);
+
+        // Inform searchview this event have been handled.
+        return false;
     }
 
     public SwipeRefreshLayout getSwipeLayout() {
